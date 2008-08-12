@@ -2,6 +2,8 @@ module PaperclippedMultiSite::AssetsControllerExtensions
   
   def self.included(base)
     base.class_eval {
+      before_filter :set_site
+      
       make_resourceful do 
         actions :all
        
@@ -45,18 +47,47 @@ module PaperclippedMultiSite::AssetsControllerExtensions
       end
       
       protected
+      
+        def set_site
+          @site = Site.find_for_host(request.host)
+        end
 
         def current_objects
-          term = params['search'].downcase + '%' if params['search']
-          @mark_term = params['search']
-          site_id = current_user.site
+          unless params['search'].blank?
+            term = params['search'].downcase
 
-          if @mark_term
-            condition = [ 'LOWER(title) LIKE ? or LOWER(caption) LIKE ? or LOWER(asset_file_name) LIKE ? (and site_id = ? OR site_id IS NULL)', '%' + term, '%' + term, '%' + term, @site.id  ]
+            search_cond_sql = []
+            cond_params = {}
+          
+            search_cond_sql << 'LOWER(asset_file_name) LIKE (:term)'
+            search_cond_sql << 'LOWER(title) LIKE (:term)'
+            search_cond_sql << 'LOWER(caption) LIKE (:term)'
+            search_cond = search_cond_sql.join(" or ")
+            search_site_sql = ['site_id = (:site_id)']
+          
+            cond_sql = "#{search_site_sql} and (#{search_cond})"
+          
+            cond_params[:term] = "%#{term}%"
+            cond_params[:site_id] = @site.id
+          
+            @conditions = [cond_sql, cond_params]
           else
-            condition = [ "site_id = ? OR site_id IS NULL", site_id ] if current_user.site
+            @conditions = ['site_id = ?', @site.id]
           end
-          Asset.paginate(:all, :conditions => condition, :order => 'created_at DESC', :page => params[:page], :per_page => 10)
+          
+          @file_types = params[:filter].blank? ? [] : params[:filter].keys
+
+          if not @file_types.empty?
+            Asset.paginate_by_content_types(@file_types, :all, :conditions => @conditions, :order => 'created_at DESC', 
+              :page => params[:page], :per_page => 10, :total_entries => count_by_conditions)
+          else
+            Asset.paginate(:all, :conditions => @conditions, :order => 'created_at DESC', :page => params[:page], :per_page => 10)
+          end
+        end
+
+        def count_by_conditions
+          type_conditions = @file_types.blank? ? nil : Asset.types_to_conditions(@file_types.dup).join(" OR ")
+          @count_by_conditions ||= @conditions.empty? ? Asset.count(:all, :conditions => type_conditions) : Asset.count(:all, :conditions => @conditions)
         end
     }
   end
