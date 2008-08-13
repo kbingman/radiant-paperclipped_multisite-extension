@@ -24,11 +24,8 @@ module PaperclippedMultiSite::AssetsControllerExtensions
             @page = Page.find(params[:page])
             @asset.pages << @page
           end
-          @asset.site = current_user.site if current_user.site
-        end
-        
-        after :update do
-          @asset.site = current_user.site if current_user.site
+          @asset.site = @site
+          @asset.save
         end
         
         response_for :update do |format|
