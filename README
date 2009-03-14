@@ -1,6 +1,6 @@
-= Paperclip Multisite
+= paperclipped_multi_site
 
-This extension scopes assets to sites. Spanner's fork of multi-site is needed. It does most of the work in the model (by putting a scope around find, essentially), so there are no controller modifications required and we can shrink this to a couple of lines.
+This extension scopes assets to sites. Our fork of multi-site is needed, and does most of the work in the model (by putting a scope around find, essentially), so there are no controller modifications required and we can shrink this to a couple of lines.
 
 You could probably get rid of this extension altogether by adding this to Asset:
 
@@ -8,5 +8,5 @@ You could probably get rid of this extension altogether by adding this to Asset:
 
 But the conditionality does make your tests a bit more tangled.
 
-Some very simple tests are included here to make sure that Asset loads and is properly scoped.
+Some basic tests are included to make sure that Asset loads and is properly scoped.
 
