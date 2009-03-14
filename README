@@ -1,3 +1,9 @@
 = Paperclip Multisite
 
-Description goes here
+This extension scopes assets to sites. With spanner's multi_site fork it's just a one-liner: you could accomplish the same thing by adding this to the Asset model in paperclipped:
+
+  is_site_scoped if defined? Site
+  
+But without some recurring conditionals that does rather bork your tests.
+
+With any luck this will one day become standard.
