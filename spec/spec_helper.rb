@@ -1,5 +1,4 @@
 unless defined? RADIANT_ROOT
-  ENV["RAILS_ENV"] = "test"
   case
   when ENV["RADIANT_ENV_FILE"]
     require ENV["RADIANT_ENV_FILE"]
@@ -9,11 +8,11 @@ unless defined? RADIANT_ROOT
     require "#{File.expand_path(File.dirname(__FILE__) + "/../../../../")}/config/environment"
   end
 end
+
 require "#{RADIANT_ROOT}/spec/spec_helper"
 
-if File.directory?(File.dirname(__FILE__) + "/scenarios")
-  Scenario.load_paths.unshift File.dirname(__FILE__) + "/scenarios"
-end
+Dataset::Resolver.default << (File.dirname(__FILE__) + "/datasets")
+
 if File.directory?(File.dirname(__FILE__) + "/matchers")
   Dir[File.dirname(__FILE__) + "/matchers/*.rb"].each {|file| require file }
 end
