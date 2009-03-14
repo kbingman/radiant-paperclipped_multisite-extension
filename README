@@ -1,9 +1,12 @@
 = Paperclip Multisite
 
-This extension scopes assets to sites. With spanner's multi_site fork it's just a one-liner: you could accomplish the same thing by adding this to the Asset model in paperclipped:
+This extension scopes assets to sites. Spanner's fork of multi-site is needed. It does most of the work in the model (by putting a scope around find, essentially), so there are no controller modifications required and we can shrink this to a couple of lines.
 
-  is_site_scoped if defined? Site
-  
-But without some recurring conditionals that does rather bork your tests.
+You could probably get rid of this extension altogether by adding this to Asset:
 
-With any luck this will one day become standard.
+  is_site_scoped if defined? Site && Radiant::Config['assets.scoped?']
+
+But the conditionality does make your tests a bit more tangled.
+
+Some very simple tests are included here to make sure that Asset loads and is properly scoped.
+
